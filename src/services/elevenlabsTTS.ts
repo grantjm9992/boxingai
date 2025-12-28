@@ -5,10 +5,10 @@
 
 // Voice IDs for different aggressive male voices
 export const COACH_VOICES = {
-  CLYDE: 'pFx1gx6PM4s1RGCPKPEl', // War veteran - deep, authoritative, sergeant-like - DEFAULT
-  ADAM: 'pNInz6obpgDQGcFmaJgB', // Deep, energetic
+  ADAM: 'pNInz6obpgDQGcFmaJgB', // Deep, energetic - DEFAULT (verified working)
   JOSH: 'TxGEqnHWrfWFTfGW9XjX', // Deep, resonant - sports commentator style
   ANTONI: 'ErXwobaYiN019PkySvjV', // Well-rounded, clear
+  CALLUM: 'N2lVS1w4EtoT3dr4eOWO', // Masculine, hoarse
 } as const;
 
 export type CoachVoice = typeof COACH_VOICES[keyof typeof COACH_VOICES];
@@ -50,7 +50,7 @@ export async function generateSpeech(
   apiKey: string,
   options: ElevenLabsTTSOptions = {}
 ): Promise<Blob> {
-  const voiceId = options.voiceId || COACH_VOICES.CLYDE;
+  const voiceId = options.voiceId || COACH_VOICES.ADAM;
   const cacheKey = getCacheKey(text, voiceId);
 
   // Check cache first

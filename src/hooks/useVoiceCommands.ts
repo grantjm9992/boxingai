@@ -51,7 +51,7 @@ export function useVoiceCommands() {
       try {
         // Use ElevenLabs for realistic voice
         const audioBlob = await ElevenLabs.generateSpeech(text, elevenLabsApiKey, {
-          voiceId: ElevenLabs.COACH_VOICES.CLYDE, // War veteran - authoritative sergeant voice
+          voiceId: ElevenLabs.COACH_VOICES.ADAM, // Deep, energetic voice
           style: 0.9, // Very expressive for aggressive coaching
         });
 
@@ -116,7 +116,7 @@ export function useVoiceCommands() {
     if (useElevenLabs && elevenLabsApiKey) {
       try {
         await ElevenLabs.preGenerateCallouts(callouts, elevenLabsApiKey, {
-          voiceId: ElevenLabs.COACH_VOICES.CLYDE,
+          voiceId: ElevenLabs.COACH_VOICES.ADAM,
           style: 0.9,
         });
         console.log(`Pre-loaded ${ElevenLabs.getCacheSize()} callouts`);
