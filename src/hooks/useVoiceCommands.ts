@@ -41,8 +41,9 @@ export function useVoiceCommands() {
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = options?.pitch ?? 1;
-    utterance.rate = options?.rate ?? 1.1; // Slightly faster for urgency
+    // Aggressive coach settings - faster and higher pitched for urgency
+    utterance.pitch = options?.pitch ?? 1.3;
+    utterance.rate = options?.rate ?? 1.5;
     utterance.volume = options?.volume ?? 1;
 
     // Use English voice if available

@@ -28,21 +28,22 @@ export async function generateTrainingSession(
 - Create 3-5 progressive workouts that build on each other
 - Each workout should have ${DEFAULT_REPETITIONS} repetitions
 - Focus on technique progression (e.g., Jab → Jab-Cross → Jab-Cross-Hook)
+- **CRITICAL: Round duration MUST be 120-180 seconds (2-3 minutes). Prefer 120 seconds. NEVER exceed 180 seconds.**
 
 **Skill Level Guidelines:**
 ${level === 'beginner' ? `
 - Focus on fundamental techniques
-- Longer rounds (2-3 minutes) with adequate rest (60-90 seconds)
+- Rounds: 120 seconds (2 minutes) with adequate rest (60-90 seconds)
 - Simple combinations (1-2 punch sequences)
 - Emphasis on form and basic footwork
 ` : level === 'intermediate' ? `
 - Mix of fundamentals and combinations
-- Standard rounds (3 minutes) with normal rest (60 seconds)
+- Rounds: 120-150 seconds (2-2.5 minutes) with normal rest (60 seconds)
 - Complex combinations (3-4 punch sequences)
 - Include defensive movements
 ` : `
 - Advanced combinations and techniques
-- Longer, intense rounds (3-5 minutes) with shorter rest (45-60 seconds)
+- Rounds: 150-180 seconds (2.5-3 minutes) with shorter rest (45-60 seconds)
 - Complex combinations with defensive counters
 - High pace and variety
 `}
@@ -85,7 +86,7 @@ Create a progressive, engaging session that matches the ${style} style and ${lev
       if (jsonMatch) {
         const result = JSON.parse(jsonMatch[0]);
 
-        // Create the training session
+        // Create the training session with enforced duration limits
         const session: TrainingSession = {
           id: `session-${Date.now()}`,
           name: result.sessionName,
@@ -98,7 +99,8 @@ Create a progressive, engaging session that matches the ${style} style and ${lev
             name: w.name,
             description: w.description,
             focus: w.focus,
-            roundDuration: w.roundDuration,
+            // Enforce max 180 seconds (3 minutes), min 60 seconds
+            roundDuration: Math.min(180, Math.max(60, w.roundDuration)),
             restDuration: w.restDuration,
             rounds: w.rounds,
             calloutInterval: w.calloutInterval,
@@ -205,7 +207,7 @@ export function getDefaultSession(style: BoxingStyle, level: SkillLevel): Traini
           name: 'Complex Combinations',
           description: 'Multi-punch sequences with feints',
           focus: ['Combinations', 'Feints', 'Angles'],
-          roundDuration: 240,
+          roundDuration: 180,
           restDuration: 45,
           rounds: 3,
           calloutInterval: 2,
@@ -216,7 +218,7 @@ export function getDefaultSession(style: BoxingStyle, level: SkillLevel): Traini
           name: 'Pressure Fighting',
           description: 'Continuous combinations with movement',
           focus: ['Pressure', 'Body Work', 'Cut Off'],
-          roundDuration: 240,
+          roundDuration: 180,
           restDuration: 45,
           rounds: 3,
           calloutInterval: 2,

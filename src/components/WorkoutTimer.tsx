@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { BoxingMove, BoxingStyle } from '../data/boxingMoves';
 import { getMovesForStyle } from '../data/boxingMoves';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 import { CoachCalloutSystem } from '../utils/coachCallouts';
 
 interface WorkoutConfig {
@@ -28,6 +29,7 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
   const [currentMove, setCurrentMove] = useState<BoxingMove | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
   const { speak, isSupported } = useVoiceCommands();
+  const { playBell } = useSoundEffects();
 
   const calloutTimerRef = useRef<number | null>(null);
   const mainTimerRef = useRef<number | null>(null);
@@ -154,7 +156,14 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
   const startRound = () => {
     setState('round');
     setTimeRemaining(config.roundDuration);
-    speak(`Round ${currentRound}! Fight!`, { rate: 1.3, pitch: 1.2 });
+
+    // Play boxing bell sound
+    playBell();
+
+    // Coach shouts round start after bell
+    setTimeout(() => {
+      speak(`Round ${currentRound}! Fight!`, { rate: 1.3, pitch: 1.2 });
+    }, 500);
 
     // Start recording on first round
     if (currentRound === 1 && config.enableRecording) {
@@ -166,8 +175,8 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
       coachSystemRef.current.reset();
     }
 
-    // Call out first move immediately
-    setTimeout(calloutMove, 1000);
+    // Call out first move after bell and round announcement
+    setTimeout(calloutMove, 1500);
 
     // Set up regular callouts
     calloutTimerRef.current = window.setInterval(
