@@ -4,6 +4,7 @@ import { getMovesForStyle } from '../data/boxingMoves';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { CoachCalloutSystem } from '../utils/coachCallouts';
+import { generateWorkoutCallouts } from '../utils/calloutPreloader';
 
 interface WorkoutConfig {
   roundDuration: number; // seconds
@@ -28,7 +29,7 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [currentMove, setCurrentMove] = useState<BoxingMove | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
-  const { speak, isSupported } = useVoiceCommands();
+  const { speak, isSupported, preloadCallouts } = useVoiceCommands();
   const { playBell } = useSoundEffects();
 
   const calloutTimerRef = useRef<number | null>(null);
@@ -46,7 +47,11 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
   useEffect(() => {
     availableMovesRef.current = getMovesForStyle(config.style);
     coachSystemRef.current = new CoachCalloutSystem(availableMovesRef.current);
-  }, [config.style]);
+
+    // Pre-generate all callouts for this workout
+    const callouts = generateWorkoutCallouts(availableMovesRef.current, config.rounds);
+    preloadCallouts(callouts);
+  }, [config.style, config.rounds, preloadCallouts]);
 
   useEffect(() => {
     if (config.enableRecording) {

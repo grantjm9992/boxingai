@@ -51,7 +51,7 @@ export function useVoiceCommands() {
       try {
         // Use ElevenLabs for realistic voice
         const audioBlob = await ElevenLabs.generateSpeech(text, elevenLabsApiKey, {
-          voiceId: ElevenLabs.COACH_VOICES.ADAM,
+          voiceId: ElevenLabs.COACH_VOICES.CLYDE, // War veteran - authoritative sergeant voice
           style: 0.9, // Very expressive for aggressive coaching
         });
 
@@ -112,5 +112,20 @@ export function useVoiceCommands() {
     }
   };
 
-  return { speak, cancel, isSupported };
+  const preloadCallouts = async (callouts: string[]): Promise<void> => {
+    if (useElevenLabs && elevenLabsApiKey) {
+      try {
+        await ElevenLabs.preGenerateCallouts(callouts, elevenLabsApiKey, {
+          voiceId: ElevenLabs.COACH_VOICES.CLYDE,
+          style: 0.9,
+        });
+        console.log(`Pre-loaded ${ElevenLabs.getCacheSize()} callouts`);
+      } catch (error) {
+        console.error('Failed to preload callouts:', error);
+      }
+    }
+    // No preloading needed for Web Speech API
+  };
+
+  return { speak, cancel, isSupported, preloadCallouts };
 }

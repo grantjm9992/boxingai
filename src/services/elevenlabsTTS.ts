@@ -5,9 +5,10 @@
 
 // Voice IDs for different aggressive male voices
 export const COACH_VOICES = {
-  ADAM: 'pNInz6obpgDQGcFmaJgB', // Deep, energetic - DEFAULT
+  CLYDE: 'pFx1gx6PM4s1RGCPKPEl', // War veteran - deep, authoritative, sergeant-like - DEFAULT
+  ADAM: 'pNInz6obpgDQGcFmaJgB', // Deep, energetic
+  JOSH: 'TxGEqnHWrfWFTfGW9XjX', // Deep, resonant - sports commentator style
   ANTONI: 'ErXwobaYiN019PkySvjV', // Well-rounded, clear
-  ARNOLD: 'VR6AewLTigWG4xSOukaG', // Crisp, strong
 } as const;
 
 export type CoachVoice = typeof COACH_VOICES[keyof typeof COACH_VOICES];
@@ -27,8 +28,18 @@ const DEFAULT_OPTIONS: Required<Omit<ElevenLabsTTSOptions, 'voiceId'>> = {
   useSpeakerBoost: true,
 };
 
+// Audio cache for pre-generated callouts
+const audioCache = new Map<string, Blob>();
+
 /**
- * Generates speech audio from text using ElevenLabs API
+ * Generates a cache key for the given text and voice
+ */
+function getCacheKey(text: string, voiceId: CoachVoice): string {
+  return `${voiceId}:${text.toLowerCase().trim()}`;
+}
+
+/**
+ * Generates speech audio from text using ElevenLabs API (with caching)
  * @param text The text to convert to speech
  * @param apiKey ElevenLabs API key
  * @param options Voice settings
@@ -39,8 +50,16 @@ export async function generateSpeech(
   apiKey: string,
   options: ElevenLabsTTSOptions = {}
 ): Promise<Blob> {
-  const voiceId = options.voiceId || COACH_VOICES.ADAM;
+  const voiceId = options.voiceId || COACH_VOICES.CLYDE;
+  const cacheKey = getCacheKey(text, voiceId);
 
+  // Check cache first
+  const cached = audioCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  // Generate new audio
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
     {
@@ -68,7 +87,12 @@ export async function generateSpeech(
     throw new Error(`ElevenLabs API error: ${response.status} - ${error}`);
   }
 
-  return await response.blob();
+  const audioBlob = await response.blob();
+
+  // Cache the result
+  audioCache.set(cacheKey, audioBlob);
+
+  return audioBlob;
 }
 
 /**
@@ -109,4 +133,41 @@ export async function speak(
 ): Promise<void> {
   const audioBlob = await generateSpeech(text, apiKey, options);
   await playAudio(audioBlob);
+}
+
+/**
+ * Pre-generates and caches multiple callouts in parallel
+ * @param callouts Array of text callouts to pre-generate
+ * @param apiKey ElevenLabs API key
+ * @param options Voice options
+ * @returns Promise that resolves when all callouts are cached
+ */
+export async function preGenerateCallouts(
+  callouts: string[],
+  apiKey: string,
+  options: ElevenLabsTTSOptions = {}
+): Promise<void> {
+  // Generate all callouts in parallel
+  const promises = callouts.map(text =>
+    generateSpeech(text, apiKey, options).catch(error => {
+      console.warn(`Failed to pre-generate callout "${text}":`, error);
+      return null;
+    })
+  );
+
+  await Promise.all(promises);
+}
+
+/**
+ * Clears the audio cache (useful for switching voices or freeing memory)
+ */
+export function clearCache(): void {
+  audioCache.clear();
+}
+
+/**
+ * Gets the current cache size (number of cached callouts)
+ */
+export function getCacheSize(): number {
+  return audioCache.size;
 }
