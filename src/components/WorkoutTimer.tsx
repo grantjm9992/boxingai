@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import type { BoxingMove, BoxingStyle } from '../data/boxingMoves';
-import { getMovesForStyle, getRandomMove } from '../data/boxingMoves';
+import { getMovesForStyle } from '../data/boxingMoves';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
+import { CoachCalloutSystem } from '../utils/coachCallouts';
 
 interface WorkoutConfig {
   roundDuration: number; // seconds
@@ -31,6 +32,7 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
   const calloutTimerRef = useRef<number | null>(null);
   const mainTimerRef = useRef<number | null>(null);
   const availableMovesRef = useRef<BoxingMove[]>([]);
+  const coachSystemRef = useRef<CoachCalloutSystem | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -41,6 +43,7 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
 
   useEffect(() => {
     availableMovesRef.current = getMovesForStyle(config.style);
+    coachSystemRef.current = new CoachCalloutSystem(availableMovesRef.current);
   }, [config.style]);
 
   useEffect(() => {
@@ -132,10 +135,20 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
     }
   };
 
-  const calloutRandomMove = () => {
-    const move = getRandomMove(availableMovesRef.current);
-    setCurrentMove(move);
-    speak(move.name, { rate: 1.2, pitch: 1.1 });
+  const calloutMove = () => {
+    if (!coachSystemRef.current) return;
+
+    const callout = coachSystemRef.current.getNextCallout();
+
+    // For display, just show the callout text
+    setCurrentMove({
+      name: callout,
+      type: callout.includes('-') ? 'combination' : 'punch',
+      description: '',
+      styles: ['universal']
+    });
+
+    speak(callout, { rate: 1.15, pitch: 1.05 });
   };
 
   const startRound = () => {
@@ -148,12 +161,17 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
       startRecording();
     }
 
+    // Reset coach system on first round
+    if (currentRound === 1 && coachSystemRef.current) {
+      coachSystemRef.current.reset();
+    }
+
     // Call out first move immediately
-    setTimeout(calloutRandomMove, 1000);
+    setTimeout(calloutMove, 1000);
 
     // Set up regular callouts
     calloutTimerRef.current = window.setInterval(
-      calloutRandomMove,
+      calloutMove,
       config.calloutInterval * 1000
     );
   };
