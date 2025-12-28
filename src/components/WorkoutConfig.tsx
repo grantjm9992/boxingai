@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { BoxingStyle, styleDescriptions } from '../data/boxingMoves';
+import type { BoxingStyle } from '../data/boxingMoves';
+import { styleDescriptions } from '../data/boxingMoves';
 
 export interface WorkoutSettings {
   roundDuration: number;

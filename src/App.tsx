@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import './App.css';
-import { WorkoutConfig, WorkoutSettings } from './components/WorkoutConfig';
+import { WorkoutConfig } from './components/WorkoutConfig';
+import type { WorkoutSettings } from './components/WorkoutConfig';
 import { WorkoutTimer } from './components/WorkoutTimer';
 import { VideoRecorder } from './components/VideoRecorder';
 import { AnalysisResults } from './components/AnalysisResults';
-import { analyzeBoxingForm, AnalysisResult } from './services/aiAnalysis';
+import { analyzeBoxingForm } from './services/aiAnalysis';
+import type { AnalysisResult } from './services/aiAnalysis';
 
 type AppMode = 'config' | 'workout' | 'analysis' | 'results';
 
@@ -46,7 +48,7 @@ function App() {
     setSettings(null);
   };
 
-  const handleRecordingComplete = async (videoBlob: Blob, frames: string[]) => {
+  const handleRecordingComplete = async (_videoBlob: Blob, frames: string[]) => {
     if (!settings) return;
 
     setIsAnalyzing(true);

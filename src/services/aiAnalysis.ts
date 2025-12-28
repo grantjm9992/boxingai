@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { BoxingStyle, styleDescriptions } from '../data/boxingMoves';
+import type { BoxingStyle } from '../data/boxingMoves';
+import { styleDescriptions } from '../data/boxingMoves';
 
 export interface AnalysisResult {
   overallScore: number;

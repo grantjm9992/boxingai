@@ -1,4 +1,4 @@
-import { AnalysisResult } from '../services/aiAnalysis';
+import type { AnalysisResult } from '../services/aiAnalysis';
 
 interface AnalysisResultsProps {
   result: AnalysisResult;

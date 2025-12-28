@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { BoxingMove, BoxingStyle, getMovesForStyle, getRandomMove } from '../data/boxingMoves';
+import type { BoxingMove, BoxingStyle } from '../data/boxingMoves';
+import { getMovesForStyle, getRandomMove } from '../data/boxingMoves';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
 
 interface WorkoutConfig {
