@@ -24,10 +24,10 @@ function App() {
   const [currentSession, setCurrentSession] = useState<TrainingSession | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [userStyle, setUserStyle] = useState<BoxingStyle>('universal');
   const [userLevel, setUserLevel] = useState<SkillLevel>('beginner');
+
+  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
 
   useEffect(() => {
     const profile = getUserProfile();
@@ -45,21 +45,12 @@ function App() {
     setMode('home');
   };
 
-  const handleStartSession = () => {
+  const handleStartSession = async () => {
     if (!apiKey) {
-      setShowApiKeyInput(true);
-    } else {
-      generateSession();
-    }
-  };
-
-  const handleApiKeySubmit = () => {
-    if (!apiKey.trim()) {
-      alert('Please enter your Anthropic API key');
+      alert('API key not configured. Please add VITE_ANTHROPIC_API_KEY to your .env file.');
       return;
     }
-    setShowApiKeyInput(false);
-    generateSession();
+    await generateSession();
   };
 
   const generateSession = async () => {
@@ -247,38 +238,6 @@ function App() {
         </div>
       )}
 
-      {showApiKeyInput && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Enter Anthropic API Key</h2>
-            <p className="modal-description">
-              Your API key is needed to generate personalized workouts and analyze your form.
-              Get your key at{' '}
-              <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer">
-                console.anthropic.com
-              </a>
-            </p>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-ant-..."
-              className="api-key-input"
-            />
-            <div className="modal-actions">
-              <button onClick={handleApiKeySubmit} className="btn btn-primary">
-                Continue
-              </button>
-              <button onClick={() => setShowApiKeyInput(false)} className="btn btn-secondary">
-                Cancel
-              </button>
-            </div>
-            <p className="note">
-              Note: Your API key is stored only in your browser session.
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
