@@ -117,8 +117,8 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
       mediaRecorder.start();
       mediaRecorderRef.current = mediaRecorder;
 
-      // Capture a frame every 0.5 seconds for analysis
-      frameIntervalRef.current = window.setInterval(captureFrame, 500);
+      // Capture a frame every 0.2 seconds (5 fps) for better analysis
+      frameIntervalRef.current = window.setInterval(captureFrame, 200);
     } catch (err) {
       console.error('Recording error:', err);
     }
