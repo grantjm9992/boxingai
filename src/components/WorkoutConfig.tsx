@@ -8,20 +8,21 @@ export interface WorkoutSettings {
   rounds: number;
   calloutInterval: number;
   style: BoxingStyle;
+  enableAnalysis: boolean;
 }
 
 interface WorkoutConfigProps {
   onStartWorkout: (settings: WorkoutSettings) => void;
-  onStartAnalysis: (settings: WorkoutSettings) => void;
 }
 
-export function WorkoutConfig({ onStartWorkout, onStartAnalysis }: WorkoutConfigProps) {
+export function WorkoutConfig({ onStartWorkout }: WorkoutConfigProps) {
   const [settings, setSettings] = useState<WorkoutSettings>({
     roundDuration: 180, // 3 minutes
     restDuration: 60, // 1 minute
     rounds: 3,
     calloutInterval: 3, // 3 seconds
     style: 'universal',
+    enableAnalysis: false,
   });
 
   const updateSetting = <K extends keyof WorkoutSettings>(
@@ -113,6 +114,18 @@ export function WorkoutConfig({ onStartWorkout, onStartAnalysis }: WorkoutConfig
             />
           </label>
         </div>
+
+        <div className="setting-item checkbox-item">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={settings.enableAnalysis}
+              onChange={(e) => updateSetting('enableAnalysis', e.target.checked)}
+              className="checkbox-input"
+            />
+            Enable AI Form Analysis (records your workout for analysis)
+          </label>
+        </div>
       </div>
 
       <div className="action-buttons">
@@ -120,13 +133,7 @@ export function WorkoutConfig({ onStartWorkout, onStartAnalysis }: WorkoutConfig
           onClick={() => onStartWorkout(settings)}
           className="btn btn-primary btn-large"
         >
-          Start Workout
-        </button>
-        <button
-          onClick={() => onStartAnalysis(settings)}
-          className="btn btn-secondary btn-large"
-        >
-          Record & Analyze Form
+          {settings.enableAnalysis ? 'Start Workout & Record' : 'Start Workout'}
         </button>
       </div>
     </div>

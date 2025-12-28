@@ -3,17 +3,15 @@ import './App.css';
 import { WorkoutConfig } from './components/WorkoutConfig';
 import type { WorkoutSettings } from './components/WorkoutConfig';
 import { WorkoutTimer } from './components/WorkoutTimer';
-import { VideoRecorder } from './components/VideoRecorder';
 import { AnalysisResults } from './components/AnalysisResults';
 import { analyzeBoxingForm } from './services/aiAnalysis';
 import type { AnalysisResult } from './services/aiAnalysis';
 
-type AppMode = 'config' | 'workout' | 'analysis' | 'results';
+type AppMode = 'config' | 'workout' | 'results';
 
 function App() {
   const [mode, setMode] = useState<AppMode>('config');
   const [settings, setSettings] = useState<WorkoutSettings | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiKey, setApiKey] = useState('');
@@ -21,12 +19,14 @@ function App() {
 
   const handleStartWorkout = (workoutSettings: WorkoutSettings) => {
     setSettings(workoutSettings);
-    setMode('workout');
-  };
 
-  const handleStartAnalysis = (workoutSettings: WorkoutSettings) => {
-    setSettings(workoutSettings);
-    setShowApiKeyInput(true);
+    if (workoutSettings.enableAnalysis) {
+      // Show API key input if analysis is enabled
+      setShowApiKeyInput(true);
+    } else {
+      // Start workout without analysis
+      setMode('workout');
+    }
   };
 
   const handleApiKeySubmit = () => {
@@ -35,35 +35,37 @@ function App() {
       return;
     }
     setShowApiKeyInput(false);
-    setMode('analysis');
+    setMode('workout');
   };
 
-  const handleWorkoutComplete = () => {
-    setMode('config');
-    setSettings(null);
+  const handleWorkoutComplete = async (frames: string[]) => {
+    if (!settings) return;
+
+    // If analysis is enabled and we have frames
+    if (settings.enableAnalysis && frames.length > 0) {
+      setIsAnalyzing(true);
+
+      try {
+        const result = await analyzeBoxingForm(frames, settings.style, apiKey);
+        setAnalysisResult(result);
+        setMode('results');
+      } catch (error) {
+        console.error('Analysis failed:', error);
+        alert('Analysis failed. Please check your API key and try again.');
+        setMode('config');
+      } finally {
+        setIsAnalyzing(false);
+      }
+    } else {
+      // No analysis, just return to config
+      setMode('config');
+      setSettings(null);
+    }
   };
 
   const handleWorkoutStop = () => {
     setMode('config');
     setSettings(null);
-  };
-
-  const handleRecordingComplete = async (_videoBlob: Blob, frames: string[]) => {
-    if (!settings) return;
-
-    setIsAnalyzing(true);
-
-    try {
-      const result = await analyzeBoxingForm(frames, settings.style, apiKey);
-      setAnalysisResult(result);
-      setMode('results');
-    } catch (error) {
-      console.error('Analysis failed:', error);
-      alert('Analysis failed. Please check your API key and try again.');
-      setMode('config');
-    } finally {
-      setIsAnalyzing(false);
-    }
   };
 
   const handleCloseResults = () => {
@@ -72,19 +74,10 @@ function App() {
     setSettings(null);
   };
 
-  const handleBackToConfig = () => {
-    setIsRecording(false);
-    setMode('config');
-    setSettings(null);
-  };
-
   return (
     <div className="app">
       {mode === 'config' && (
-        <WorkoutConfig
-          onStartWorkout={handleStartWorkout}
-          onStartAnalysis={handleStartAnalysis}
-        />
+        <WorkoutConfig onStartWorkout={handleStartWorkout} />
       )}
 
       {mode === 'workout' && settings && (
@@ -96,27 +89,11 @@ function App() {
               rounds: settings.rounds,
               calloutInterval: settings.calloutInterval,
               style: settings.style,
+              enableRecording: settings.enableAnalysis,
             }}
             onWorkoutComplete={handleWorkoutComplete}
             onWorkoutStop={handleWorkoutStop}
           />
-        </div>
-      )}
-
-      {mode === 'analysis' && settings && (
-        <div className="analysis-mode">
-          <h2>Form Analysis</h2>
-          <p className="instruction">
-            Record yourself performing boxing techniques. The AI will analyze your form when you stop recording.
-          </p>
-          <VideoRecorder
-            onRecordingComplete={handleRecordingComplete}
-            isRecording={isRecording}
-            onToggleRecording={() => setIsRecording(!isRecording)}
-          />
-          <button onClick={handleBackToConfig} className="btn btn-secondary">
-            Back to Config
-          </button>
           {isAnalyzing && (
             <div className="analyzing-overlay">
               <div className="analyzing-message">
