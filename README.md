@@ -29,7 +29,8 @@ An intelligent boxing training application that provides programmable workouts w
 ### Prerequisites
 - Node.js 16+
 - Modern web browser with camera access (for form analysis)
-- Anthropic API key (for AI analysis feature)
+- Anthropic API key (required - for AI workout generation and analysis)
+- ElevenLabs API key (optional - for realistic coach voice, otherwise uses robotic browser voice)
 
 ### Installation
 
@@ -44,12 +45,23 @@ cd boxingai
 npm install
 ```
 
-3. Start the development server:
+3. Create a `.env` file from the example:
+```bash
+cp .env.example .env
+```
+
+4. Edit `.env` and add your API keys:
+```env
+VITE_ANTHROPIC_API_KEY=your_anthropic_api_key_here
+VITE_ELEVENLABS_API_KEY=your_elevenlabs_api_key_here  # Optional
+```
+
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
-4. Open your browser to the URL shown (typically `http://localhost:5173`)
+6. Open your browser to the URL shown (typically `http://localhost:5173`)
 
 ## Usage
 
@@ -76,30 +88,47 @@ npm run dev
 
 ## API Key Setup
 
-To use the AI analysis feature, you need an Anthropic API key:
+### Anthropic API Key (Required)
+
+For AI workout generation and form analysis:
 
 1. Visit [console.anthropic.com](https://console.anthropic.com/)
 2. Create an account or sign in
 3. Generate an API key
-4. Enter the key when prompted in the application
+4. Add it to your `.env` file as `VITE_ANTHROPIC_API_KEY`
 
-**Note**: Your API key is stored only in your browser session and is never sent to any server except Anthropic's API.
+### ElevenLabs API Key (Optional but Recommended)
+
+For realistic, aggressive coach voice instead of robotic browser voice:
+
+1. Visit [elevenlabs.io](https://elevenlabs.io)
+2. Create a free account (10,000 characters/month free tier)
+3. Get your API key from the profile section
+4. Add it to your `.env` file as `VITE_ELEVENLABS_API_KEY`
+
+**Without ElevenLabs**: The app will fallback to the browser's Web Speech API, which sounds robotic.
+**With ElevenLabs**: You get a realistic, energetic boxing coach voice that shouts commands like a real trainer.
+
+**Note**: API keys are stored in environment variables and sent only to their respective services (Anthropic/ElevenLabs).
 
 ## Technology Stack
 
 - **Frontend**: React 18 with TypeScript
 - **Build Tool**: Vite
-- **AI Analysis**: Anthropic Claude API with vision capabilities
-- **Voice**: Web Speech API (SpeechSynthesis)
+- **AI Analysis**: Anthropic Claude Sonnet 4 API with vision capabilities
+- **Voice**: ElevenLabs AI Text-to-Speech (with Web Speech API fallback)
 - **Video**: MediaRecorder API
+- **Audio**: Web Audio API for bell sounds
 
 ## Features in Detail
 
 ### Voice Command System
-The application uses the Web Speech API to provide real-time audio feedback:
-- Announces round start/end
-- Calls out random punches and defensive moves
-- Adjustable pitch and rate for clear commands
+The application uses ElevenLabs AI voice (or Web Speech API fallback) to provide real-time audio feedback:
+- Realistic, aggressive boxing coach voice that shouts commands
+- Announces round start/end with energy
+- Calls out intelligent punch combinations and defensive moves
+- Boxing bell sound at the start of each round
+- Automatic fallback to browser voice if ElevenLabs is unavailable
 
 ### AI Analysis
 Powered by Claude's vision capabilities:

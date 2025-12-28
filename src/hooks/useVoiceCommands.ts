@@ -1,12 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
+import * as ElevenLabs from '../services/elevenlabsTTS';
 
 export function useVoiceCommands() {
   const [isSupported, setIsSupported] = useState(false);
+  const [useElevenLabs, setUseElevenLabs] = useState(false);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const elevenLabsApiKey = import.meta.env.VITE_ELEVENLABS_API_KEY || '';
 
   useEffect(() => {
-    if ('speechSynthesis' in window) {
+    // Check if ElevenLabs is available
+    if (elevenLabsApiKey) {
+      setUseElevenLabs(true);
+      setIsSupported(true);
+    } else if ('speechSynthesis' in window) {
+      // Fallback to Web Speech API
       synthRef.current = window.speechSynthesis;
       setIsSupported(true);
 
@@ -32,9 +41,42 @@ export function useVoiceCommands() {
         synthRef.current.onvoiceschanged = loadVoices;
       }
     }
-  }, []);
+  }, [elevenLabsApiKey]);
 
-  const speak = (text: string, options?: { pitch?: number; rate?: number; volume?: number }) => {
+  const speak = async (text: string, options?: { pitch?: number; rate?: number; volume?: number }) => {
+    // Cancel any ongoing speech
+    cancel();
+
+    if (useElevenLabs && elevenLabsApiKey) {
+      try {
+        // Use ElevenLabs for realistic voice
+        const audioBlob = await ElevenLabs.generateSpeech(text, elevenLabsApiKey, {
+          voiceId: ElevenLabs.COACH_VOICES.ADAM,
+          style: 0.9, // Very expressive for aggressive coaching
+        });
+
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        currentAudioRef.current = audio;
+
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          currentAudioRef.current = null;
+        };
+
+        await audio.play();
+      } catch (error) {
+        console.error('ElevenLabs TTS failed, falling back to Web Speech:', error);
+        // Fallback to Web Speech API
+        speakWithWebSpeech(text, options);
+      }
+    } else {
+      // Use Web Speech API fallback
+      speakWithWebSpeech(text, options);
+    }
+  };
+
+  const speakWithWebSpeech = (text: string, options?: { pitch?: number; rate?: number; volume?: number }) => {
     if (!synthRef.current) return;
 
     // Cancel any ongoing speech
@@ -58,6 +100,13 @@ export function useVoiceCommands() {
   };
 
   const cancel = () => {
+    // Cancel ElevenLabs audio if playing
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+
+    // Cancel Web Speech if active
     if (synthRef.current) {
       synthRef.current.cancel();
     }
