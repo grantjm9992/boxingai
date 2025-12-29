@@ -7,6 +7,7 @@ import { SessionPlayer } from './components/SessionPlayer';
 import { AnalysisResults } from './components/AnalysisResults';
 import { Settings } from './components/Settings';
 import { WorkoutHistory } from './components/WorkoutHistory';
+import { WorkoutPreview } from './components/WorkoutPreview';
 import { analyzeBoxingForm } from './services/aiAnalysis';
 import type { AnalysisResult } from './services/aiAnalysis';
 import { generateTrainingSession, getDefaultSession } from './services/workoutGenerator';
@@ -19,7 +20,7 @@ import {
   canUseAnalysisToday,
 } from './services/userProfile';
 
-type AppMode = 'setup' | 'home' | 'generating' | 'session' | 'results';
+type AppMode = 'setup' | 'home' | 'generating' | 'preview' | 'session' | 'results';
 
 function App() {
   const [mode, setMode] = useState<AppMode>('setup');
@@ -63,14 +64,23 @@ function App() {
     try {
       const session = await generateTrainingSession(userStyle, userLevel, apiKey);
       setCurrentSession(session);
-      setMode('session');
+      setMode('preview');
     } catch (error) {
       console.error('Session generation failed:', error);
       alert('Failed to generate session. Using default workout instead.');
       const session = getDefaultSession(userStyle, userLevel);
       setCurrentSession(session);
-      setMode('session');
+      setMode('preview');
     }
+  };
+
+  const handlePreviewStart = () => {
+    setMode('session');
+  };
+
+  const handlePreviewCancel = () => {
+    setMode('home');
+    setCurrentSession(null);
   };
 
   const handleWorkoutComplete = async (
@@ -228,6 +238,14 @@ function App() {
             <p>Creating a personalized {userLevel} {userStyle}-style workout...</p>
           </div>
         </div>
+      )}
+
+      {mode === 'preview' && currentSession && (
+        <WorkoutPreview
+          session={currentSession}
+          onStart={handlePreviewStart}
+          onCancel={handlePreviewCancel}
+        />
       )}
 
       {mode === 'session' && currentSession && (
