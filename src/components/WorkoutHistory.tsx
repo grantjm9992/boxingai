@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getUserProgress } from '../services/userProfile';
-import type { SessionProgress, WorkoutCompletion } from '../types/training';
+import type { SessionProgress } from '../types/training';
 
 interface WorkoutHistoryProps {
   onClose: () => void;
