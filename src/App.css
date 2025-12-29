@@ -171,6 +171,25 @@ body {
   background: #e53e3e;
 }
 
+.btn-warning {
+  background: #ecc94b;
+  color: #1a202c;
+  font-weight: 600;
+}
+
+.btn-warning:hover {
+  background: #d69e2e;
+}
+
+.btn-success {
+  background: #48bb78;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #38a169;
+}
+
 .btn-large {
   flex: 1;
   padding: 1rem 2rem;
@@ -232,12 +251,37 @@ body {
   color: #2d3748;
 }
 
+.state-badge[data-state='paused'] {
+  background: #ecc94b;
+  color: #1a202c;
+}
+
+.time-display-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.progress-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
 .time-display {
   font-size: 5rem;
   font-weight: 700;
   color: #1a202c;
-  margin: 1rem 0;
   font-variant-numeric: tabular-nums;
+  z-index: 1;
+  position: relative;
 }
 
 .current-move {
@@ -262,6 +306,10 @@ body {
 
 .timer-controls {
   margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .warning {

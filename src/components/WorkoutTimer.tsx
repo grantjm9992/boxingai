@@ -21,7 +21,7 @@ interface WorkoutTimerProps {
   onWorkoutStop: () => void;
 }
 
-type WorkoutState = 'ready' | 'round' | 'rest' | 'complete';
+type WorkoutState = 'ready' | 'round' | 'rest' | 'paused' | 'complete';
 
 export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: WorkoutTimerProps) {
   const [state, setState] = useState<WorkoutState>('ready');
@@ -36,6 +36,7 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
   const mainTimerRef = useRef<number | null>(null);
   const availableMovesRef = useRef<BoxingMove[]>([]);
   const coachSystemRef = useRef<CoachCalloutSystem | null>(null);
+  const pausedFromStateRef = useRef<'round' | 'rest'>('round');
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -246,6 +247,52 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
     onWorkoutStop();
   };
 
+  const pauseWorkout = () => {
+    if (state !== 'round' && state !== 'rest') return;
+
+    // Remember which state we're pausing from
+    pausedFromStateRef.current = state;
+
+    // Clear all timers
+    if (calloutTimerRef.current) {
+      clearInterval(calloutTimerRef.current);
+      calloutTimerRef.current = null;
+    }
+    if (mainTimerRef.current) {
+      clearInterval(mainTimerRef.current);
+      mainTimerRef.current = null;
+    }
+
+    // Pause frame capture
+    if (frameIntervalRef.current) {
+      clearInterval(frameIntervalRef.current);
+      frameIntervalRef.current = null;
+    }
+
+    setState('paused');
+  };
+
+  const resumeWorkout = () => {
+    if (state !== 'paused') return;
+
+    // Restore the previous state
+    const previousState = pausedFromStateRef.current;
+    setState(previousState);
+
+    // Resume frame capture if we were in a round
+    if (previousState === 'round' && config.enableRecording) {
+      frameIntervalRef.current = window.setInterval(captureFrame, 200);
+    }
+
+    // Resume callouts if in round
+    if (previousState === 'round') {
+      calloutTimerRef.current = window.setInterval(
+        calloutMove,
+        config.calloutInterval * 1000
+      );
+    }
+  };
+
   useEffect(() => {
     if (state === 'round' || state === 'rest') {
       mainTimerRef.current = window.setInterval(() => {
@@ -305,12 +352,40 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
         <div className="round-info">
           <h2>Round {currentRound} of {config.rounds}</h2>
           <div className="state-badge" data-state={state}>
-            {state === 'round' ? 'FIGHT!' : state === 'rest' ? 'REST' : state === 'complete' ? 'COMPLETE' : 'READY'}
+            {state === 'round' ? 'FIGHT!' : state === 'rest' ? 'REST' : state === 'paused' ? 'PAUSED' : state === 'complete' ? 'COMPLETE' : 'READY'}
           </div>
         </div>
 
-        <div className="time-display">
-          {formatTime(timeRemaining)}
+        <div className="time-display-container">
+          {(state === 'round' || state === 'rest' || state === 'paused') && (
+            <svg className="progress-ring" width="300" height="300">
+              <circle
+                className="progress-ring-circle-bg"
+                stroke="#e2e8f0"
+                strokeWidth="12"
+                fill="transparent"
+                r="140"
+                cx="150"
+                cy="150"
+              />
+              <circle
+                className="progress-ring-circle"
+                stroke={state === 'round' || (state === 'paused' && pausedFromStateRef.current === 'round') ? '#48bb78' : '#ed8936'}
+                strokeWidth="12"
+                fill="transparent"
+                r="140"
+                cx="150"
+                cy="150"
+                strokeDasharray={`${2 * Math.PI * 140}`}
+                strokeDashoffset={`${2 * Math.PI * 140 * (1 - (timeRemaining / (state === 'round' || (state === 'paused' && pausedFromStateRef.current === 'round') ? config.roundDuration : config.restDuration)))}`}
+                strokeLinecap="round"
+                transform="rotate(-90 150 150)"
+              />
+            </svg>
+          )}
+          <div className="time-display">
+            {formatTime(timeRemaining)}
+          </div>
         </div>
 
         {currentMove && (
@@ -328,9 +403,24 @@ export function WorkoutTimer({ config, onWorkoutComplete, onWorkoutStop }: Worko
           </button>
         )}
         {(state === 'round' || state === 'rest') && (
-          <button onClick={stopWorkout} className="btn btn-danger">
-            Stop Workout
-          </button>
+          <>
+            <button onClick={pauseWorkout} className="btn btn-warning">
+              ⏸ Pause
+            </button>
+            <button onClick={stopWorkout} className="btn btn-danger">
+              ⏹ Stop
+            </button>
+          </>
+        )}
+        {state === 'paused' && (
+          <>
+            <button onClick={resumeWorkout} className="btn btn-success">
+              ▶ Resume
+            </button>
+            <button onClick={stopWorkout} className="btn btn-danger">
+              ⏹ Stop
+            </button>
+          </>
         )}
         {state === 'complete' && (
           <button onClick={() => { setCurrentRound(1); setState('ready'); }} className="btn btn-primary">
