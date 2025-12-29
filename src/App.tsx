@@ -5,6 +5,7 @@ import type { SkillLevel, TrainingSession } from './types/training';
 import { UserSetup } from './components/UserSetup';
 import { SessionPlayer } from './components/SessionPlayer';
 import { AnalysisResults } from './components/AnalysisResults';
+import { Settings } from './components/Settings';
 import { analyzeBoxingForm } from './services/aiAnalysis';
 import type { AnalysisResult } from './services/aiAnalysis';
 import { generateTrainingSession, getDefaultSession } from './services/workoutGenerator';
@@ -26,6 +27,7 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [userStyle, setUserStyle] = useState<BoxingStyle>('universal');
   const [userLevel, setUserLevel] = useState<SkillLevel>('beginner');
+  const [showSettings, setShowSettings] = useState(false);
 
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
 
@@ -180,9 +182,14 @@ function App() {
               </div>
             )}
 
-            <button onClick={handleStartSession} className="btn btn-primary btn-large">
-              Generate New Session
-            </button>
+            <div className="home-actions">
+              <button onClick={handleStartSession} className="btn btn-primary btn-large">
+                Generate New Session
+              </button>
+              <button onClick={() => setShowSettings(true)} className="btn btn-secondary">
+                ⚙️ Settings
+              </button>
+            </div>
 
             <div className="recent-sessions">
               <h2>Recent Sessions</h2>
@@ -237,6 +244,8 @@ function App() {
           </div>
         </div>
       )}
+
+      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
 
     </div>
   );
