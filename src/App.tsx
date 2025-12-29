@@ -6,6 +6,7 @@ import { UserSetup } from './components/UserSetup';
 import { SessionPlayer } from './components/SessionPlayer';
 import { AnalysisResults } from './components/AnalysisResults';
 import { Settings } from './components/Settings';
+import { WorkoutHistory } from './components/WorkoutHistory';
 import { analyzeBoxingForm } from './services/aiAnalysis';
 import type { AnalysisResult } from './services/aiAnalysis';
 import { generateTrainingSession, getDefaultSession } from './services/workoutGenerator';
@@ -28,6 +29,7 @@ function App() {
   const [userStyle, setUserStyle] = useState<BoxingStyle>('universal');
   const [userLevel, setUserLevel] = useState<SkillLevel>('beginner');
   const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
 
@@ -192,7 +194,14 @@ function App() {
             </div>
 
             <div className="recent-sessions">
-              <h2>Recent Sessions</h2>
+              <div className="recent-sessions-header">
+                <h2>Recent Sessions</h2>
+                {progress.sessionHistory.length > 0 && (
+                  <button onClick={() => setShowHistory(true)} className="btn-link">
+                    View All History →
+                  </button>
+                )}
+              </div>
               {progress.sessionHistory.slice(-3).reverse().map((session, i) => (
                 <div key={i} className="session-card">
                   <div className="session-date">
@@ -246,6 +255,7 @@ function App() {
       )}
 
       {showSettings && <Settings onClose={() => setShowSettings(false)} />}
+      {showHistory && <WorkoutHistory onClose={() => setShowHistory(false)} />}
 
     </div>
   );

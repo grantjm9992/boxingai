@@ -426,6 +426,271 @@ body {
   text-align: right;
 }
 
+/* Workout History Modal */
+.history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.history-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.history-header h2 {
+  font-size: 1.8rem;
+  color: #1a202c;
+  margin: 0;
+}
+
+.history-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.summary-stat {
+  text-align: center;
+}
+
+.summary-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 0.25rem;
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-content {
+  overflow-y: auto;
+  padding: 1.5rem 2rem;
+  flex: 1;
+}
+
+.history-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: right;
+}
+
+.empty-history {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #718096;
+}
+
+.empty-history p {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  color: #a0aec0;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.session-history-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.session-history-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.session-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  background: white;
+  transition: background 0.2s;
+}
+
+.session-history-header:hover {
+  background: #f7fafc;
+}
+
+.session-history-info {
+  flex: 1;
+}
+
+.session-history-date {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.session-history-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.meta-badge {
+  padding: 0.25rem 0.75rem;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #4a5568;
+}
+
+.score-badge {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  font-weight: 600;
+}
+
+.expand-icon {
+  font-size: 1.2rem;
+  color: #a0aec0;
+  transition: transform 0.2s;
+}
+
+.session-history-details {
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.session-history-details h4 {
+  font-size: 1.1rem;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.workout-completion-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.workout-completion-card:last-child {
+  margin-bottom: 0;
+}
+
+.completion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.completion-number {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.completion-rep {
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+.completion-analysis {
+  margin-top: 1rem;
+}
+
+.analysis-score {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f7fafc;
+  border-radius: 8px;
+}
+
+.score-label {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.score-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.analysis-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feedback-section {
+  font-size: 0.95rem;
+}
+
+.feedback-section strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+}
+
+.feedback-section ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #4a5568;
+}
+
+.feedback-section li {
+  margin-bottom: 0.25rem;
+}
+
+.feedback-section p {
+  color: #4a5568;
+  line-height: 1.6;
+  margin: 0;
+}
+
 .warning {
   margin-top: 1rem;
   padding: 1rem;
@@ -960,10 +1225,33 @@ body {
   margin-top: 2rem;
 }
 
+.recent-sessions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .recent-sessions h2 {
   font-size: 1.3rem;
   color: #2d3748;
-  margin-bottom: 1rem;
+  margin: 0;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.btn-link:hover {
+  color: #5a67d8;
+  text-decoration: underline;
 }
 
 .session-card {
